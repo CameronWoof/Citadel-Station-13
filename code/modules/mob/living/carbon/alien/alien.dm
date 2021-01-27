@@ -4,7 +4,6 @@
 	gender = FEMALE //All xenos are girls!!
 	dna = null
 	faction = list(ROLE_ALIEN)
-	ventcrawler = VENTCRAWLER_ALWAYS
 	sight = SEE_MOBS
 	see_in_dark = 4
 	verb_say = "hisses"
@@ -19,7 +18,6 @@
 	/// How much brute damage they do to simple animals
 	var/meleeSlashSAPower = 35
 
-	var/obj/item/card/id/wear_id = null // Fix for station bounced radios -- Skie
 	var/has_fine_manipulation = 0
 	var/move_delay_add = 0 // movement delay to add
 
@@ -33,12 +31,14 @@
 	var/static/regex/alien_name_regex = new("alien (larva|sentinel|drone|hunter|praetorian|queen)( \\(\\d+\\))?")
 
 /mob/living/carbon/alien/Initialize()
-	verbs += /mob/living/proc/mob_sleep
-	verbs += /mob/living/proc/lay_down
+	add_verb(src, /mob/living/proc/mob_sleep)
+	add_verb(src, /mob/living/proc/lay_down)
 
 	create_bodyparts() //initialize bodyparts
 
 	create_internal_organs()
+
+	AddElement(/datum/element/ventcrawling, given_tier = VENTCRAWLER_ALWAYS)
 
 	. = ..()
 
@@ -93,11 +93,9 @@
 /mob/living/carbon/alien/IsAdvancedToolUser()
 	return has_fine_manipulation
 
-/mob/living/carbon/alien/Stat()
-	..()
-
-	if(statpanel("Status"))
-		stat(null, "Intent: [a_intent]")
+/mob/living/carbon/alien/get_status_tab_items()
+	. = ..()
+	. += "Intent: [a_intent]"
 
 /mob/living/carbon/alien/getTrail()
 	if(getBruteLoss() < 200)

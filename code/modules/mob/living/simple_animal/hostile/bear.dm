@@ -2,7 +2,6 @@
 /mob/living/simple_animal/hostile/bear
 	name = "space bear"
 	desc = "You don't need to be faster than a space bear, you just need to outrun your crewmates."
-	threat = 1
 	icon_state = "bear"
 	icon_living = "bear"
 	icon_dead = "bear_dead"
@@ -33,7 +32,7 @@
 	melee_damage_upper = 15
 	wound_bonus = -5
 	bare_wound_bonus = 10 // BEAR wound bonus am i right
-	sharpness = TRUE
+	sharpness = SHARP_EDGED
 	attack_verb_continuous = "claws"
 	attack_verb_simple = "claw"
 	attack_sound = 'sound/weapons/bladeslice.ogg'
@@ -110,7 +109,7 @@
 		to_chat(user, "<span class='info'>You strap the armor plating to [A] and sharpen [A.p_their()] claws with the nail filer. This was a great idea.</span>")
 		qdel(src)
 
-mob/living/simple_animal/hostile/bear/butter //The mighty companion to Cak. Several functions used from it.
+/mob/living/simple_animal/hostile/bear/butter //The mighty companion to Cak. Several functions used from it.
 	name = "Terrygold"
 	icon_state = "butterbear"
 	icon_living = "butterbear"
@@ -136,7 +135,7 @@ mob/living/simple_animal/hostile/bear/butter //The mighty companion to Cak. Seve
 	if(health < maxHealth)
 		heal_overall_damage(10) //Fast life regen, makes it hard for you to get eaten to death.
 
-/mob/living/simple_animal/hostile/bear/butter/attack_hand(mob/living/L) //Borrowed code from Cak, feeds people if they hit you. More nutriment but less vitamin to represent BUTTER.
+/mob/living/simple_animal/hostile/bear/butter/on_attack_hand(mob/living/L) //Borrowed code from Cak, feeds people if they hit you. More nutriment but less vitamin to represent BUTTER.
 	..()
 	if(L.a_intent == INTENT_HARM && L.reagents && !stat)
 		L.reagents.add_reagent(/datum/reagent/consumable/nutriment, 1)
@@ -156,7 +155,7 @@ mob/living/simple_animal/hostile/bear/butter //The mighty companion to Cak. Seve
 		to_chat(src, "<span class='notice'>Your name is now <b>\"new_name\"</b>!</span>")
 		name = new_name
 
-mob/living/simple_animal/hostile/bear/butter/AttackingTarget() //Makes some attacks by the butter bear slip those who dare cross its path.
+/mob/living/simple_animal/hostile/bear/butter/AttackingTarget() //Makes some attacks by the butter bear slip those who dare cross its path.
 	if(isliving(target))
 		var/mob/living/L = target
 		if((L.mobility_flags & MOBILITY_STAND))

@@ -65,7 +65,7 @@
 	if(merge)
 		for(var/obj/item/stack/S in loc)
 			if(S.merge_type == merge_type)
-				merge(S)
+				INVOKE_ASYNC(src, .proc/merge, S)
 	var/list/temp_recipes = get_main_recipes()
 	recipes = temp_recipes.Copy()
 	if(material_type)
@@ -233,7 +233,7 @@
 				return
 			T.PlaceOnTop(R.result_type, flags = CHANGETURF_INHERIT_AIR)
 		else
-			O = new R.result_type(usr.drop_location())
+			O = new R.result_type(get_turf(usr))
 		if(O)
 			O.setDir(usr.dir)
 			log_craft("[O] crafted by [usr] at [loc_name(O.loc)]")
@@ -398,8 +398,7 @@
 		merge(AM)
 	. = ..()
 
-//ATTACK HAND IGNORING PARENT RETURN VALUE
-/obj/item/stack/attack_hand(mob/user, act_intent = user.a_intent, unarmed_attack_flags)
+/obj/item/stack/on_attack_hand(mob/user, act_intent = user.a_intent, unarmed_attack_flags)
 	if(user.get_inactive_held_item() == src)
 		if(zero_amount())
 			return

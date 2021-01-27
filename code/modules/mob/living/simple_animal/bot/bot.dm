@@ -290,7 +290,7 @@
 	return TRUE //Successful completion. Used to prevent child process() continuing if this one is ended early.
 
 
-/mob/living/simple_animal/bot/attack_hand(mob/living/carbon/human/H)
+/mob/living/simple_animal/bot/on_attack_hand(mob/living/carbon/human/H)
 	if(H.a_intent == INTENT_HELP)
 		interact(H)
 	else
@@ -335,7 +335,6 @@
 					user.visible_message("<span class='notice'>[user] uses [W] to pull [paicard] out of [bot_name]!</span>","<span class='notice'>You pull [paicard] out of [bot_name] with [W].</span>")
 					ejectpai(user)
 	else
-		user.changeNext_move(CLICK_CD_MELEE)
 		if(istype(W, /obj/item/weldingtool) && user.a_intent != INTENT_HARM)
 			if(health >= maxHealth)
 				to_chat(user, "<span class='warning'>[src] does not need a repair!</span>")
@@ -371,7 +370,7 @@
 		ejectpai(0)
 	if(on)
 		turn_off()
-	spawn(severity*300)
+	spawn(3 * severity)
 		stat &= ~EMPED
 		if(was_on)
 			turn_on()
@@ -1059,3 +1058,6 @@ Pass a positive integer as an argument to override a bot's default speed.
 	if(I)
 		I.icon_state = null
 	path.Cut(1, 2)
+
+/mob/living/silicon/rust_heretic_act()
+	adjustBruteLoss(500)

@@ -23,6 +23,8 @@
 	climbable = TRUE
 	obj_flags = CAN_BE_HIT|SHOVABLE_ONTO
 	pass_flags = LETPASSTHROW //You can throw objects over this, despite it's density.")
+	attack_hand_speed = CLICK_CD_MELEE
+	attack_hand_is_action = TRUE
 	var/frame = /obj/structure/table_frame
 	var/framestack = /obj/item/stack/rods
 	var/buildstack = /obj/item/stack/sheet/metal
@@ -60,7 +62,7 @@
 /obj/structure/table/attack_paw(mob/user)
 	return attack_hand(user)
 
-/obj/structure/table/attack_hand(mob/living/user)
+/obj/structure/table/on_attack_hand(mob/living/user, act_intent = user.a_intent, unarmed_attack_flags)
 	if(Adjacent(user) && user.pulling)
 		if(isliving(user.pulling))
 			var/mob/living/pushed_mob = user.pulling
@@ -71,7 +73,7 @@
 				if(user.grab_state < GRAB_AGGRESSIVE)
 					to_chat(user, "<span class='warning'>You need a better grip to do that!</span>")
 					return
-				if(user.grab_state >= GRAB_NECK)
+				if(user.grab_state >= GRAB_NECK || HAS_TRAIT(user, TRAIT_MAULER))
 					tablelimbsmash(user, pushed_mob)
 				else
 					tablepush(user, pushed_mob)
@@ -145,7 +147,7 @@
 	pushed_mob.Knockdown(30)
 	var/obj/item/bodypart/banged_limb = pushed_mob.get_bodypart(user.zone_selected) || pushed_mob.get_bodypart(BODY_ZONE_HEAD)
 	var/extra_wound = 0
-	if(HAS_TRAIT(user, TRAIT_HULK))
+	if(HAS_TRAIT(user, TRAIT_HULK) || HAS_TRAIT(user, TRAIT_MAULER))
 		extra_wound = 20
 	banged_limb.receive_damage(30, wound_bonus = extra_wound)
 	pushed_mob.apply_damage(60, STAMINA)
@@ -210,8 +212,10 @@
 	return
 
 /obj/structure/table/alt_attack_hand(mob/user)
+	if(!user.CheckActionCooldown(CLICK_CD_MELEE))
+		return
+	user.DelayNextAction()
 	if(user && Adjacent(user) && !user.incapacitated())
-		user.changeNext_move(CLICK_CD_MELEE*0.5)
 		if(istype(user) && user.a_intent == INTENT_HARM)
 			user.visible_message("<span class='warning'>[user] slams [user.p_their()] palms down on [src].</span>", "<span class='warning'>You slam your palms down on [src].</span>")
 			playsound(src, 'sound/weapons/sonic_jackhammer.ogg', 50, 1)
@@ -265,13 +269,13 @@
 	UnregisterSignal(source, COMSIG_MOVABLE_MOVED)
 
 /obj/structure/table/rolling/Moved(atom/OldLoc, Dir)
+	. = ..()
 	for(var/mob/M in OldLoc.contents)//Kidnap everyone on top
 		M.forceMove(loc)
 	for(var/x in attached_items)
 		var/atom/movable/AM = x
 		if(!AM.Move(loc))
 			RemoveItemFromTable(AM, AM.loc)
-	return TRUE
 
 /*
  * Glass tables
@@ -593,7 +597,7 @@
 	icon = 'icons/obj/smooth_structures/brass_table.dmi'
 	icon_state = "brass_table"
 	resistance_flags = FIRE_PROOF | ACID_PROOF
-	buildstack = /obj/item/stack/tile/bronze
+	buildstack = /obj/item/stack/sheet/bronze
 	canSmoothWith = list(/obj/structure/table/reinforced/brass, /obj/structure/table/bronze)
 
 /obj/structure/table/bronze/tablelimbsmash(mob/living/user, mob/living/pushed_mob)
@@ -654,6 +658,8 @@
 	anchored = TRUE
 	pass_flags = LETPASSTHROW //You can throw objects over this, despite it's density.
 	max_integrity = 20
+	attack_hand_speed = CLICK_CD_MELEE
+	attack_hand_is_action = TRUE
 
 /obj/structure/rack/examine(mob/user)
 	. = ..()
@@ -695,13 +701,12 @@
 /obj/structure/rack/attack_paw(mob/living/user)
 	attack_hand(user)
 
-/obj/structure/rack/attack_hand(mob/living/user, act_intent = user.a_intent, unarmed_attack_flags)
+/obj/structure/rack/on_attack_hand(mob/living/user, act_intent = user.a_intent, unarmed_attack_flags)
 	. = ..()
 	if(.)
 		return
 	if(CHECK_MULTIPLE_BITFIELDS(user.mobility_flags, MOBILITY_STAND|MOBILITY_MOVE) || user.get_num_legs() < 2)
 		return
-	user.changeNext_move(CLICK_CD_MELEE)
 	user.do_attack_animation(src, ATTACK_EFFECT_KICK)
 	user.visible_message("<span class='danger'>[user] kicks [src].</span>", null, null, COMBAT_MESSAGE_RANGE)
 	take_damage(rand(4,8), BRUTE, "melee", 1)

@@ -37,7 +37,7 @@
 	* TYPECONT: The typepath of the contents of the list
 	* COMPARE: The object to compare against, usualy the same as INPUT
 	* COMPARISON: The variable on the objects to compare
-	* COMPTYPE: How the current bin item to compare against COMPARE is fetched. By key or value.
+	* COMPTYPE: How should the values be compared? Either COMPARE_KEY or COMPARE_VALUE.
 	*/
 #define BINARY_INSERT(INPUT, LIST, TYPECONT, COMPARE, COMPARISON, COMPTYPE) \
 	do {\
@@ -49,7 +49,7 @@
 			var/__BIN_LEFT = 1;\
 			var/__BIN_RIGHT = __BIN_CTTL;\
 			var/__BIN_MID = (__BIN_LEFT + __BIN_RIGHT) >> 1;\
-			var/##TYPECONT/__BIN_ITEM;\
+			var ##TYPECONT/__BIN_ITEM;\
 			while(__BIN_LEFT < __BIN_RIGHT) {\
 				__BIN_ITEM = COMPTYPE;\
 				if(__BIN_ITEM.##COMPARISON <= COMPARE.##COMPARISON) {\
@@ -67,24 +67,25 @@
 
 //Returns a list in plain english as a string
 /proc/english_list(list/input, nothing_text = "nothing", and_text = " and ", comma_text = ", ", final_comma_text = "" )
-	var/total = input.len
-	if (!total)
-		return nothing_text
-	else if (total == 1)
-		return "[input[1]]"
-	else if (total == 2)
-		return "[input[1]][and_text][input[2]]"
-	else
-		var/output = ""
-		var/index = 1
-		while (index < total)
-			if (index == total - 1)
-				comma_text = final_comma_text
+	var/total = length(input)
+	switch(total)
+		if (0)
+			return "[nothing_text]"
+		if (1)
+			return "[input[1]]"
+		if (2)
+			return "[input[1]][and_text][input[2]]"
+		else
+			var/output = ""
+			var/index = 1
+			while (index < total)
+				if (index == total - 1)
+					comma_text = final_comma_text
 
-			output += "[input[index]][comma_text]"
-			index++
+				output += "[input[index]][comma_text]"
+				index++
 
-		return "[output][and_text][input[index]]"
+			return "[output][and_text][input[index]]"
 
 //Returns list element or null. Should prevent "index out of bounds" error.
 /proc/listgetindex(list/L, index)
@@ -553,12 +554,6 @@
 			if(D.vars[varname] == value)
 				return D
 
-//remove all nulls from a list
-/proc/removeNullsFromList(list/L)
-	while(L.Remove(null))
-		continue
-	return L
-
 //Copies a list, and all lists inside it recusively
 //Does not copy any other reference type
 /proc/deepCopyList(list/l)
@@ -681,3 +676,11 @@
 			continue
 		if(istype(D, path))
 			return TRUE
+
+/proc/safe_json_encode(list/L, default = "")
+	. = default
+	return json_encode(L)
+
+/proc/safe_json_decode(string, default = list())
+	. = default
+	return json_decode(string)

@@ -190,7 +190,7 @@
 /obj/item/clothing/head/wig
 	name = "wig"
 	desc = "A bunch of hair without a head attached."
-	icon = 'icons/mob/human_face.dmi'	  // default icon for all hairs
+	icon = 'icons/mob/hair.dmi'	  // default icon for all hairs
 	icon_state = "hair_vlong"
 	flags_inv = HIDEHAIR
 	color = "#000"
@@ -290,7 +290,7 @@
 	if(!target.IsUnconscious())
 		to_chat(target, "<span class='warning'>Your zealous conspirationism rapidly dissipates as the donned hat warps up into a ruined mess. All those theories starting to sound like nothing but a ridicolous fanfare.</span>")
 
-/obj/item/clothing/head/foilhat/attack_hand(mob/user, act_intent = user.a_intent, unarmed_attack_flags)
+/obj/item/clothing/head/foilhat/on_attack_hand(mob/user, act_intent = user.a_intent, unarmed_attack_flags)
 	if(!warped && iscarbon(user))
 		var/mob/living/carbon/C = user
 		if(src == C.head)

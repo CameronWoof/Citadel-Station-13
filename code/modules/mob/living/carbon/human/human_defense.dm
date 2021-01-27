@@ -1,4 +1,6 @@
 /mob/living/carbon/human/getarmor(def_zone, type)
+	if(HAS_TRAIT(src, TRAIT_ARMOR_BROKEN)) //trait that makes it act as if you have no armor at all, you take natural damage from all sources
+		return 0
 	var/armorval = 0
 	var/organnum = 0
 
@@ -17,7 +19,6 @@
 		armorval += checkarmor(BP, type)
 		organnum++
 	return (armorval/max(organnum, 1))
-
 
 /mob/living/carbon/human/proc/checkarmor(obj/item/bodypart/def_zone, d_type)
 	if(!d_type || !def_zone)
@@ -122,7 +123,7 @@
 		apply_damage(15, BRUTE, wound_bonus=10)
 		return 1
 
-/mob/living/carbon/human/attack_hand(mob/user, act_intent = user.a_intent, unarmed_attack_flags)
+/mob/living/carbon/human/on_attack_hand(mob/user, act_intent = user.a_intent, unarmed_attack_flags)
 	. = ..()
 	if(.) //To allow surgery to return properly.
 		return
@@ -131,6 +132,9 @@
 		dna.species.spec_attack_hand(H, src, null, act_intent, unarmed_attack_flags)
 
 /mob/living/carbon/human/attack_paw(mob/living/carbon/monkey/M)
+	if(!M.CheckActionCooldown(CLICK_CD_MELEE))
+		return
+	M.DelayNextAction()
 	var/dam_zone = pick(BODY_ZONE_CHEST, BODY_ZONE_PRECISE_L_HAND, BODY_ZONE_PRECISE_R_HAND, BODY_ZONE_L_LEG, BODY_ZONE_R_LEG)
 	var/obj/item/bodypart/affecting = get_bodypart(ran_zone(dam_zone))
 	if(!affecting)
@@ -296,10 +300,10 @@
 
 
 /mob/living/carbon/human/ex_act(severity, target, origin)
-	if(origin && istype(origin, /datum/spacevine_mutation) && isvineimmune(src))
+	if(TRAIT_BOMBIMMUNE in dna.species.species_traits)
 		return
 	..()
-	if (!severity)
+	if (!severity || QDELETED(src))
 		return
 	var/brute_loss = 0
 	var/burn_loss = 0
@@ -333,7 +337,8 @@
 			if (!istype(ears, /obj/item/clothing/ears/earmuffs))
 				adjustEarDamage(30, 120)
 			Unconscious(20)							//short amount of time for follow up attacks against elusive enemies like wizards
-			Knockdown(200 - (bomb_armor * 1.6)) 	//between ~4 and ~20 seconds of knockdown depending on bomb armor
+			Knockdown((200 - (bomb_armor * 1.6)) / 4) 	//between ~1 and ~5 seconds of knockdown depending on bomb armor
+			adjustStaminaLoss(brute_loss)
 
 		if(EXPLODE_LIGHT)
 			brute_loss = 30
@@ -342,7 +347,8 @@
 			damage_clothes(max(50 - bomb_armor, 0), BRUTE, "bomb")
 			if (!istype(ears, /obj/item/clothing/ears/earmuffs))
 				adjustEarDamage(15,60)
-			Knockdown(160 - (bomb_armor * 1.6))		//100 bomb armor will prevent knockdown altogether
+			Knockdown((160 - (bomb_armor * 1.6)) / 4)		//100 bomb armor will prevent knockdown altogether
+			adjustStaminaLoss(brute_loss)
 
 	take_overall_damage(brute_loss,burn_loss)
 
@@ -402,18 +408,21 @@
 	if(. & EMP_PROTECT_CONTENTS)
 		return
 	var/informed = FALSE
+	if(isrobotic(src))
+		apply_status_effect(/datum/status_effect/no_combat_mode/robotic_emp, severity / 20)
+	severity *= 0.5
+	var/do_not_stun = FALSE
+	if(HAS_TRAIT(src, TRAIT_ROBOTIC_ORGANISM))
+		severity *= 0.5 //Robotpeople take less limb damage, but instead suffer system corruption (see carbon emp_act)
+		do_not_stun = TRUE
 	for(var/obj/item/bodypart/L in src.bodyparts)
-		if(L.status == BODYPART_ROBOTIC)
+		if(L.is_robotic_limb())
 			if(!informed)
 				to_chat(src, "<span class='userdanger'>You feel a sharp pain as your robotic limbs overload.</span>")
 				informed = TRUE
-			switch(severity)
-				if(1)
-					L.receive_damage(0,10)
-					Stun(200)
-				if(2)
-					L.receive_damage(0,5)
-					Stun(100)
+			L.receive_damage(0,severity/10)
+			if(!do_not_stun)	//Tiny bit better than checking for the trait another six times in succession
+				Stun(severity*2)
 
 /mob/living/carbon/human/acid_act(acidpwr, acid_volume, bodyzone_hit)
 	var/list/damaged = list()

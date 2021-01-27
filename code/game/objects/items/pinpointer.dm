@@ -30,9 +30,13 @@
 	target = null
 	return ..()
 
+/obj/item/pinpointer/DoRevenantThrowEffects(atom/target)
+	attack_self()
+
 /obj/item/pinpointer/attack_self(mob/living/user)
 	active = !active
-	user.visible_message("<span class='notice'>[user] [active ? "" : "de"]activates [user.p_their()] pinpointer.</span>", "<span class='notice'>You [active ? "" : "de"]activate your pinpointer.</span>")
+	if(user)
+		user.visible_message("<span class='notice'>[user] [active ? "" : "de"]activates [user.p_their()] pinpointer.</span>", "<span class='notice'>You [active ? "" : "de"]activate your pinpointer.</span>")
 	playsound(src, 'sound/items/screwdriver2.ogg', 50, 1)
 	if(active)
 		START_PROCESSING(SSfastprocess, src)
@@ -200,3 +204,11 @@
 /obj/item/pinpointer/shuttle/Destroy()
 	shuttleport = null
 	. = ..()
+
+/obj/item/pinpointer/ian
+	name = "ian pinpointer"
+	desc = "A handheld tracking device that locates Ian. Made with real corgis!"
+	icon_state = "pinpointer_ian"
+
+/obj/item/pinpointer/ian/scan_for_target()
+	target = locate(/mob/living/simple_animal/pet/dog/corgi/Ian) in GLOB.mob_living_list

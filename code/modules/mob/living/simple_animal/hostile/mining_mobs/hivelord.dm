@@ -9,7 +9,6 @@
 	icon_gib = "syndicate_gib"
 	mob_biotypes = MOB_ORGANIC
 	mouse_opacity = MOUSE_OPACITY_OPAQUE
-	threat = 4
 	move_to_delay = 14
 	ranged = 1
 	vision_range = 4
@@ -241,7 +240,6 @@
 	icon_state = "legion"
 	icon_living = "legion"
 	icon_dead = "legion"
-	threat = 5
 	health = 450
 	maxHealth = 450
 	melee_damage_lower = 20
@@ -400,7 +398,6 @@
 			uniform = /obj/item/clothing/under/color/grey
 			belt = /obj/item/tank/internals/emergency_oxygen
 			mask = /obj/item/clothing/mask/gas
-			ears = /obj/item/radio/headset
 			gloves = /obj/item/clothing/gloves/color/fyellow
 			id = /obj/item/card/id/silver/reaper //looks cool and has a fancy name but only a 1% chance
 			if(prob(99))
@@ -414,7 +411,7 @@
 				back = /obj/item/spear
 			else if(prob(80)) //Now they dont always have a backpack
 				back = /obj/item/storage/backpack
-				backpack_contents = list(/obj/item/stack/cable_coil = 1, /obj/item/assembly/flash = 1, /obj/item/storage/fancy/donut_box = 1, /obj/item/storage/fancy/cigarettes/cigpack_shadyjims = 1, /obj/item/lighter = 1)
+				backpack_contents = list(/obj/item/stack/cable_coil = 1, /obj/item/storage/fancy/donut_box = 1, /obj/item/storage/fancy/cigarettes/cigpack_shadyjims = 1, /obj/item/lighter = 1)
 			if(prob(90))
 				r_pocket = /obj/item/kitchen/knife
 			if(prob(60))
@@ -425,7 +422,6 @@
 			suit = /obj/item/clothing/suit/hooded/bee_costume
 			shoes = /obj/item/clothing/shoes/sneakers/yellow
 			gloves = /obj/item/clothing/gloves/color/yellow
-			ears = /obj/item/radio/headset
 			belt = /obj/item/storage/belt/fannypack/yellow
 			id_job = "Assisant"
 			id = /obj/item/card/id
